@@ -1,23 +1,116 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "../../backend/auth/AuthContext";
+import { AlertCircle, Loader2, CheckCircle } from "lucide-react";
 
 const SignUp = () => {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const { signUp, loading, error } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    // Client-side validation
+    if (password !== confirmPassword) {
+      return;
+    }
+
+    if (password.length < 6) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const { error } = await signUp({
+      email,
+      password,
+      fullName,
+    });
+
+    if (!error) {
+      setSuccess(true);
+      // Redirect to login page after successful signup
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    }
+
+    setIsSubmitting(false);
+  };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+
+        <div className="pt-32 pb-20 px-6 flex items-center justify-center">
+          <div className="w-full max-w-md">
+            <div className="glass-card p-8 rounded-3xl glow-effect text-center">
+              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+              <h1 className="text-3xl font-bold mb-2">Account Created!</h1>
+              <p className="text-muted-foreground mb-4">
+                Please check your email to verify your account.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Redirecting to login page...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <div className="pt-32 pb-20 px-6 flex items-center justify-center">
         <div className="w-full max-w-md">
           <div className="glass-card p-8 rounded-3xl glow-effect">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
-              <p className="text-muted-foreground">Start transforming meetings into action</p>
+              <p className="text-muted-foreground">
+                Start transforming meetings into action
+              </p>
             </div>
 
-            <form className="space-y-6">
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {password !== confirmPassword && confirmPassword && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>Passwords do not match</AlertDescription>
+              </Alert>
+            )}
+
+            {password && password.length < 6 && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Password must be at least 6 characters long
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input
@@ -25,6 +118,10 @@ const SignUp = () => {
                   type="text"
                   placeholder="John Doe"
                   className="glass-card"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  disabled={loading || isSubmitting}
                 />
               </div>
 
@@ -35,6 +132,10 @@ const SignUp = () => {
                   type="email"
                   placeholder="you@company.com"
                   className="glass-card"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loading || isSubmitting}
                 />
               </div>
 
@@ -45,6 +146,11 @@ const SignUp = () => {
                   type="password"
                   placeholder="••••••••"
                   className="glass-card"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  disabled={loading || isSubmitting}
                 />
               </div>
 
@@ -55,11 +161,31 @@ const SignUp = () => {
                   type="password"
                   placeholder="••••••••"
                   className="glass-card"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={loading || isSubmitting}
                 />
               </div>
 
-              <Button className="w-full bg-gradient-primary hover:opacity-90 transition-opacity glow-effect">
-                Create Account
+              <Button
+                type="submit"
+                className="w-full bg-gradient-primary hover:opacity-90 transition-opacity glow-effect"
+                disabled={
+                  loading ||
+                  isSubmitting ||
+                  password !== confirmPassword ||
+                  password.length < 6
+                }
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
 
               <div className="relative">
@@ -67,7 +193,9 @@ const SignUp = () => {
                   <div className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-card text-muted-foreground">Or continue with</span>
+                  <span className="px-4 bg-card text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 

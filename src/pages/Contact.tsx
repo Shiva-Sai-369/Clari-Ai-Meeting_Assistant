@@ -10,31 +10,45 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <div className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* About Section */}
             <div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                About <span className="gradient-text">EchoMeet</span>
+                About <span className="gradient-text">Clari</span>
               </h1>
               <div className="space-y-6 text-muted-foreground leading-relaxed">
                 <p>
-                  EchoMeet is a voice-based AI meeting assistant that transforms how teams capture, understand, and act on meeting discussions. Built with cutting-edge AI technology from OpenAI, we make meetings more productive and actionable.
+                  Clari is a voice-based AI meeting assistant that transforms
+                  how teams capture, understand, and act on meeting discussions.
+                  Built with cutting-edge AI technology from OpenAI, we make
+                  meetings more productive and actionable.
                 </p>
-                
+
                 <div className="glass-card p-6 rounded-2xl">
-                  <h2 className="text-2xl font-bold text-foreground mb-4">Our Mission</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">
+                    Our Mission
+                  </h2>
                   <p>
-                    We believe meetings should drive action, not confusion. EchoMeet eliminates the friction between conversation and execution by automatically capturing insights, extracting tasks, and integrating with your workflow.
+                    We believe meetings should drive action, not confusion.
+                    Clari eliminates the friction between conversation and
+                    execution by automatically capturing insights, extracting
+                    tasks, and integrating with your workflow.
                   </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl">
-                  <h2 className="text-2xl font-bold text-foreground mb-4">The Technology</h2>
+                  <h2 className="text-2xl font-bold text-foreground mb-4">
+                    The Technology
+                  </h2>
                   <p>
-                    Powered by GPT-4o for intelligent summarization and Whisper for industry-leading speech recognition, EchoMeet brings enterprise-grade AI to every meeting. Our RAG-powered chatbot ensures you can always find what was discussed, decided, and assigned.
+                    Powered by GPT-4o for intelligent summarization and Whisper
+                    for industry-leading speech recognition, Clari brings
+                    enterprise-grade AI to every meeting. Our RAG-powered
+                    chatbot ensures you can always find what was discussed,
+                    decided, and assigned.
                   </p>
                 </div>
 
@@ -45,7 +59,7 @@ const Contact = () => {
                   </Button>
                   <Button variant="outline" className="gap-2">
                     <Mail className="w-5 h-5" />
-                    hello@echomeet.ai
+                    hello@clari.ai
                   </Button>
                 </div>
               </div>
@@ -55,7 +69,8 @@ const Contact = () => {
             <div className="glass-card p-8 rounded-3xl glow-effect">
               <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
               <p className="text-muted-foreground mb-8">
-                Have questions or want to learn more? We'd love to hear from you.
+                Have questions or want to learn more? We'd love to hear from
+                you.
               </p>
 
               <form className="space-y-6">
