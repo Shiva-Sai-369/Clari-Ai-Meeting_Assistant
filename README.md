@@ -1,4 +1,32 @@
-# Welcome to your Lovable project
+# Synch Echo Mind - Real-Time Meeting Assistant
+
+A modern web application with advanced AI-powered meeting assistance, featuring real-time speech-to-text transcription with speaker diarization powered by OpenAI Whisper API.
+
+## ✨ Key Features
+
+### 🎤 Real-Time Speech Recognition
+
+- **OpenAI Whisper Integration**: State-of-the-art AI speech recognition with exceptional accuracy
+- **Multi-language Support**: Supports 99+ languages with automatic language detection
+- **Speaker Diarization**: Intelligent speaker identification and conversation flow detection
+- **Multiple Output Formats**: JSON, verbose JSON with timestamps, SRT, VTT, and plain text
+- **High-Quality Transcription**: Robust to background noise and diverse accents
+
+### 🎯 Advanced Features
+
+- **Audio Level Monitoring**: Visual feedback for microphone input levels
+- **Temperature Control**: Adjustable creativity vs. deterministic output
+- **Automatic Punctuation**: Smart punctuation insertion for better readability
+- **Export Functionality**: Export transcription results as JSON with metadata
+- **Browser Compatibility Checking**: Automatic detection of required Web API support
+
+### 🔧 Technical Capabilities
+
+- **Optimized Audio Processing**: 16kHz sample rate, mono channel, noise suppression
+- **Cost-Effective**: $0.006 per minute (significantly cheaper than alternatives)
+- **Error Handling**: Comprehensive error handling and validation
+- **Responsive Design**: Modern UI with Tailwind CSS and shadcn/ui components
+- **TypeScript**: Fully typed for better development experience
 
 ## Project info
 
@@ -32,9 +60,89 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Configure OpenAI Whisper API
+# Copy .env file and add your OpenAI API key
+cp .env.example .env
+# Edit .env file with your OpenAI API key
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+
+## 🔑 OpenAI Whisper API Setup
+
+To use the speech-to-text functionality, you'll need to set up OpenAI Whisper API:
+
+1. **Create an OpenAI Account**
+
+   - Go to [OpenAI Platform](https://platform.openai.com/)
+   - Sign up or log in to your account
+
+2. **Get Your API Key**
+
+   - Navigate to [API Keys](https://platform.openai.com/api-keys)
+   - Click "Create new secret key"
+   - Copy the generated API key
+
+3. **Add Billing Information**
+
+   - Go to [Billing](https://platform.openai.com/account/billing)
+   - Add a payment method (required for API usage)
+
+4. **Configure Environment Variables**
+   ```env
+   VITE_OPENAI_API_KEY=your-openai-api-key
+   ```
+
+**Cost**: $0.006 per minute (very affordable!)
+
+For detailed setup instructions, see [OpenAI Whisper Setup Guide](./docs/OPENAI_WHISPER_SETUP.md).
+
+## 🚀 Quick Start
+
+1. **Demo the Speech Recognition**
+
+   - Navigate to the Demo page
+   - Click on the "Advanced Demo" tab
+   - Allow microphone access when prompted
+   - Click "Start Recording" and begin speaking
+
+2. **Features to Try**
+   - Multi-speaker conversations (speaker diarization)
+   - Different languages
+   - Export transcription results
+   - Audio level monitoring
+
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── SpeechToText.tsx          # OpenAI Whisper speech-to-text component
+│   ├── SpeechToTextDemo.tsx      # Advanced demo with full features
+│   └── ui/                       # shadcn/ui components
+├── hooks/
+│   └── useSpeechToText.ts        # React hook for speech recognition
+├── lib/
+│   └── audioUtils.ts             # Audio processing utilities
+├── pages/
+│   └── Demo.tsx                  # Demo page with speech features
+└── backend/
+    └── services/
+        └── speechToTextService.ts # OpenAI Whisper service
+```
+
+## 🔄 Migration from Google Cloud
+
+We've migrated from Google Cloud Speech-to-Text to OpenAI Whisper for several advantages:
+
+- **Cost-effective**: $0.006/minute vs Google's $1.44/hour
+- **Higher accuracy**: State-of-the-art AI transcription
+- **More languages**: 99+ vs 10+ languages
+- **Better noise handling**: Robust to background noise
+- **Simpler setup**: Single API key vs complex GCP setup
+
+## 📝 Development
 
 **Edit a file directly in GitHub**
 
@@ -48,7 +156,6 @@ npm run dev
 - Click on the "Code" button (green button) near the top right.
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
 

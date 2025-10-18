@@ -8,6 +8,11 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Uncomment the following lines if you need HTTPS for microphone access
+    // https: {
+    //   key: './path/to/key.pem',
+    //   cert: './path/to/cert.pem',
+    // }
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
