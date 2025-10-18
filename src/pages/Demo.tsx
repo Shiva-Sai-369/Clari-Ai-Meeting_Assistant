@@ -1,7 +1,5 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import SpeechToTextComponent from "@/components/SpeechToText";
-import SpeechToTextDemo from "@/components/SpeechToTextDemo";
 import FreeSpeechToTextComponent from "@/components/FreeSpeechToText";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,17 +22,9 @@ import {
   DollarSign,
 } from "lucide-react";
 import { useState } from "react";
-import { TranscriptionSegment } from "../../backend/services/speechToTextService";
 
 const Demo = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [liveTranscription, setLiveTranscription] = useState<
-    TranscriptionSegment[]
-  >([]);
-
-  const handleTranscriptionUpdate = (segments: TranscriptionSegment[]) => {
-    setLiveTranscription(segments);
-  };
 
   const captions = [
     {
@@ -94,7 +84,7 @@ const Demo = () => {
           {/* Demo Interface */}
           <div className="mb-12">
             <Tabs defaultValue="live-demo" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="live-demo">Live Demo</TabsTrigger>
                 <TabsTrigger
                   value="free-speech"
@@ -103,8 +93,6 @@ const Demo = () => {
                   <DollarSign className="h-3 w-3" />
                   Free Speech
                 </TabsTrigger>
-                <TabsTrigger value="speech-to-text">OpenAI Whisper</TabsTrigger>
-                <TabsTrigger value="advanced-demo">Advanced Demo</TabsTrigger>
               </TabsList>
 
               <TabsContent value="live-demo" className="mt-8">
@@ -265,107 +253,6 @@ const Demo = () => {
                     <FreeSpeechToTextComponent />
                   </CardContent>
                 </Card>
-              </TabsContent>
-
-              <TabsContent value="speech-to-text" className="mt-8">
-                <div className="space-y-6">
-                  <div className="text-center mb-8">
-                    <h3 className="text-2xl font-bold mb-4">
-                      Live Speech-to-Text with OpenAI Whisper
-                    </h3>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
-                      Powered by OpenAI Whisper API. Experience high-quality
-                      transcription with advanced AI capabilities and
-                      multi-language support.
-                    </p>
-                  </div>
-
-                  <div className="grid lg:grid-cols-3 gap-6 mb-8">
-                    <Card className="glass-card">
-                      <CardHeader className="text-center">
-                        <Zap className="h-12 w-12 text-primary mx-auto mb-2" />
-                        <CardTitle>AI-Powered Accuracy</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground text-center">
-                          State-of-the-art AI transcription with exceptional
-                          accuracy and context understanding
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="glass-card">
-                      <CardHeader className="text-center">
-                        <Users className="h-12 w-12 text-primary mx-auto mb-2" />
-                        <CardTitle>Multi-Speaker Support</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground text-center">
-                          Advanced speaker identification with intelligent
-                          conversation flow detection
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="glass-card">
-                      <CardHeader className="text-center">
-                        <Globe className="h-12 w-12 text-primary mx-auto mb-2" />
-                        <CardTitle>99+ Languages</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground text-center">
-                          Support for 99+ languages with world-class accuracy
-                          and automatic language detection
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <SpeechToTextComponent
-                    onTranscriptionUpdate={handleTranscriptionUpdate}
-                    className="max-w-4xl mx-auto"
-                  />
-
-                  {liveTranscription.length > 0 && (
-                    <Card className="glass-card max-w-4xl mx-auto">
-                      <CardHeader>
-                        <CardTitle>Live Transcription Summary</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground">
-                            Total segments: {liveTranscription.length}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Unique speakers:{" "}
-                            {
-                              new Set(liveTranscription.map((s) => s.speaker))
-                                .size
-                            }
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            Average confidence:{" "}
-                            {liveTranscription.length > 0
-                              ? (
-                                  (liveTranscription.reduce(
-                                    (acc, s) => acc + s.confidence,
-                                    0
-                                  ) /
-                                    liveTranscription.length) *
-                                  100
-                                ).toFixed(1)
-                              : 0}
-                            %
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="advanced-demo" className="mt-8">
-                <SpeechToTextDemo />
               </TabsContent>
             </Tabs>
           </div>
