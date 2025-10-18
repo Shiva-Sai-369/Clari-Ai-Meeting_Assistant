@@ -22,3 +22,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Large files and media
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# API keys and secrets (never commit these)
+**/secrets/**
+**/*secret*
+**/*token*
+**/*key*.txt
