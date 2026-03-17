@@ -3,17 +3,23 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.')
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey)
+
+if (!isSupabaseConfigured) {
+  console.warn('Supabase environment variables are missing. Auth-backed features will be disabled until VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient(
+  supabaseUrl || 'https://example.supabase.co',
+  supabaseKey || 'public-anon-key',
+  {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
   }
-})
+  }
+)
 
 // Database Types (will be generated from Supabase CLI or defined manually)
 export interface Database {

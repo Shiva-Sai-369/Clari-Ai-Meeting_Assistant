@@ -16,12 +16,11 @@ import {
   Mic,
   FileText,
   CheckSquare,
-  Zap,
-  Users,
-  Globe,
-  DollarSign,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { WaitlistHero } from "@/components/ui/waitlist-hero";
 
 const Demo = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -69,13 +68,13 @@ const Demo = () => {
           <div className="text-center mb-16">
             <div className="inline-block mb-6 px-4 py-2 rounded-full glass-card">
               <span className="text-sm font-medium gradient-text">
-                Demo powered by GPT-4o Realtime API
+                Gemini AI + Browser Speech API
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               See <span className="gradient-text">Clari</span> in Action
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
               Experience real-time transcription, AI summaries, and action item
               extraction
             </p>
@@ -90,7 +89,7 @@ const Demo = () => {
                   value="free-speech"
                   className="flex items-center gap-1"
                 >
-                  <DollarSign className="h-3 w-3" />
+                  <Sparkles className="h-3 w-3" />
                   Free Speech
                 </TabsTrigger>
               </TabsList>
@@ -235,7 +234,7 @@ const Demo = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-green-600" />
+                      <Sparkles className="h-5 w-5 text-violet-500" />
                       Free Speech-to-Text
                       <Badge
                         variant="secondary"
@@ -257,20 +256,9 @@ const Demo = () => {
             </Tabs>
           </div>
 
-          {/* CTA */}
-          <div className="text-center glass-card p-12 rounded-3xl glow-effect">
-            <h2 className="text-3xl font-bold mb-4">
-              Ready to Transform Your Meetings?
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Experience the full power of AI-driven meeting assistance
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-primary hover:opacity-90 transition-opacity glow-effect"
-            >
-              Start Free Trial
-            </Button>
+          {/* Waitlist Hero CTA */}
+          <div className="mt-20">
+            <WaitlistHero />
           </div>
         </div>
       </div>

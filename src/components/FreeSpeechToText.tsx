@@ -6,6 +6,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
+import { Skeleton } from "./ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -25,6 +26,9 @@ import {
   Zap,
   DollarSign,
   CheckCircle,
+  Sparkles,
+  CheckSquare,
+  Lightbulb,
 } from "lucide-react";
 import {
   useFreeSpeechToText,
@@ -33,6 +37,10 @@ import {
 import FreeSpeechToTextService, {
   TranscriptionSegment,
 } from "../../backend/services/freeSpeechToTextService";
+import {
+  generateMeetingSummary,
+  type MeetingSummary,
+} from "../lib/geminiService";
 
 interface FreeSpeechToTextProps {
   onTranscriptionUpdate?: (segments: TranscriptionSegment[]) => void;
@@ -48,6 +56,12 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
     "unknown" | "granted" | "denied" | "prompt"
   >("unknown");
   const [showPermissionGuide, setShowPermissionGuide] = useState(false);
+  const [summaryState, setSummaryState] = useState<
+    "idle" | "loading" | "done" | "error"
+  >("idle");
+  const [summary, setSummary] = useState<MeetingSummary | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [config, setConfig] = useState({
     enableSpeakerDiarization: true,
     languageCode: "en-US",
@@ -121,9 +135,44 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
     }
   };
 
+  const handleClearTranscription = () => {
+    clearTranscription();
+    setSummary(null);
+    setSummaryState("idle");
+    setSummaryError(null);
+  };
+
+  const handleGenerateSummary = async () => {
+    setSummaryState("loading");
+    setSummaryError(null);
+    try {
+      const result = await generateMeetingSummary(transcription);
+      setSummary(result);
+      setSummaryState("done");
+    } catch (err) {
+      setSummaryError(err instanceof Error ? err.message : "Unknown error");
+      setSummaryState("error");
+    }
+  };
+
   useEffect(() => {
     onTranscriptionUpdate?.(transcription);
   }, [transcription, onTranscriptionUpdate]);
+
+  useEffect(() => {
+    if (!isRecording) {
+      setElapsedSeconds(0);
+      return;
+    }
+    const interval = setInterval(() => setElapsedSeconds((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatElapsed = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString([], {
@@ -363,7 +412,7 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={clearTranscription}
+                    onClick={handleClearTranscription}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -374,49 +423,69 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Main Controls */}
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              size="lg"
-              onClick={isRecording ? stopRecording : handleStartRecording}
-              className={`w-32 ${
-                isRecording
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-500 hover:bg-green-600"
-              }`}
-            >
-              {isRecording ? (
-                <>
-                  <MicOff className="h-5 w-5 mr-2" />
-                  Stop
-                </>
-              ) : (
-                <>
-                  <Mic className="h-5 w-5 mr-2" />
-                  Start
-                </>
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative flex items-center justify-center">
+              {isRecording && (
+                <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-40 animate-ping" />
               )}
-            </Button>
+              <Button
+                size="lg"
+                onClick={isRecording ? stopRecording : handleStartRecording}
+                className={`relative w-16 h-16 rounded-full p-0 ${
+                  isRecording
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {isRecording ? (
+                  <MicOff className="h-6 w-6" />
+                ) : (
+                  <Mic className="h-6 w-6" />
+                )}
+              </Button>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {isRecording ? "Tap to stop" : "Tap to start"}
+            </span>
           </div>
 
-          {/* Status */}
-          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              Speaker Detection:{" "}
-              {config.enableSpeakerDiarization ? "Enabled" : "Disabled"}
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              Segments: {transcription.length} (
-              {transcription.filter((s) => s.isFinal).length} final)
-            </div>
-          </div>
-
-          {/* Recording Status */}
+          {/* Live Stats — visible while recording */}
           {isRecording && (
-            <div className="flex items-center justify-center gap-2 text-green-600">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-              <span className="font-medium">Listening... Speak now!</span>
+            <div className="grid grid-cols-3 gap-4 text-center py-2">
+              <div>
+                <p className="text-2xl font-mono font-bold text-red-500 tabular-nums">
+                  {formatElapsed(elapsedSeconds)}
+                </p>
+                <p className="text-xs text-muted-foreground">Elapsed</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {transcription
+                    .filter((s) => s.isFinal)
+                    .reduce((acc, s) => acc + s.text.trim().split(/\s+/).length, 0)}
+                </p>
+                <p className="text-xs text-muted-foreground">Words</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">
+                  {transcription.filter((s) => s.isFinal).length}
+                </p>
+                <p className="text-xs text-muted-foreground">Segments</p>
+              </div>
+            </div>
+          )}
+
+          {/* Idle stats — visible when not recording */}
+          {!isRecording && transcription.length > 0 && (
+            <div className="flex justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                {new Set(transcription.map((s) => s.speaker)).size} speaker(s)
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {transcription.filter((s) => s.isFinal).length} segments
+              </div>
             </div>
           )}
 
@@ -558,10 +627,18 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
         <CardContent>
           <ScrollArea className="h-96 w-full">
             {transcription.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
-                {isRecording
-                  ? "Listening... Start speaking to see transcription."
-                  : "Click 'Start' to begin free speech recognition."}
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground py-16">
+                <div className={`rounded-full p-4 ${isRecording ? "bg-red-50" : "bg-muted"}`}>
+                  <Mic className={`h-8 w-8 ${isRecording ? "text-red-500 animate-pulse" : "text-muted-foreground"}`} />
+                </div>
+                <p className="text-sm font-medium">
+                  {isRecording ? "Listening… start speaking" : "Tap the mic to begin"}
+                </p>
+                <p className="text-xs text-center max-w-48">
+                  {isRecording
+                    ? "Transcript will appear here as you speak"
+                    : "Speech is recognised locally in your browser — no data leaves your device"}
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -602,8 +679,126 @@ const FreeSpeechToTextComponent: React.FC<FreeSpeechToTextProps> = ({
               </div>
             )}
           </ScrollArea>
+
+          {!isRecording &&
+            transcription.filter((s) => s.isFinal).length > 0 && (
+              <div className="mt-4">
+                <Button
+                  onClick={handleGenerateSummary}
+                  disabled={summaryState === "loading"}
+                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:opacity-90 transition-opacity"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {summaryState === "loading"
+                    ? "Generating AI Summary..."
+                    : summaryState === "done"
+                      ? "Regenerate AI Summary"
+                      : "Generate AI Summary"}
+                </Button>
+              </div>
+            )}
         </CardContent>
       </Card>
+
+      {/* AI Summary */}
+      {summaryState === "loading" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-500" />
+              Generating AI Summary...
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/6" />
+            <Separator />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </CardContent>
+        </Card>
+      )}
+
+      {summaryState === "error" && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertDescription className="text-red-800">
+            <p className="font-medium">Failed to generate summary</p>
+            <p className="text-sm mt-1">{summaryError}</p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {summaryState === "done" && summary && (
+        <div className="space-y-3">
+          {/* Summary */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="h-4 w-4 text-violet-500" />
+                Meeting Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {summary.summary.map((point, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-violet-500 shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Action Items */}
+          {summary.actionItems.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <CheckSquare className="h-4 w-4 text-blue-500" />
+                  Action Items
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  {summary.actionItems.map((item, i) => (
+                    <li key={i} className="text-sm border rounded-lg p-3 space-y-1">
+                      <p className="font-medium">{item.task}</p>
+                      <div className="flex gap-4 text-muted-foreground text-xs">
+                        <span>Owner: {item.owner}</span>
+                        <span>Due: {item.deadline}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Key Decisions */}
+          {summary.keyDecisions.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  Key Decisions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {summary.keyDecisions.map((decision, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                      {decision}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Usage Tips */}
       <Card>
